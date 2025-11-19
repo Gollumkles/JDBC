@@ -58,3 +58,77 @@ INSERT INTO courses (name, description, hours, begindate, enddate, coursetype) V
         </dependency>
 ```
 ![img.png](img.png)
+
+# Code bis Kapitel 4
+```
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement; // <--- FEHLTE
+import java.sql.ResultSet;        // <--- FEHLTE
+import java.sql.SQLException;
+
+public class JdbcDemo {
+
+    public static void main(String[] args) {
+        selectAllDemo();
+    }
+
+    public static void selectAllDemo() {
+        String user = "user";
+        String pwd = "12345";
+        System.out.println("Select all Demo JDBC");
+
+        String connectionUrl = "jdbc:mysql://localhost:3306/jdbcdemo";
+
+        try (Connection conn = DriverManager.getConnection(connectionUrl, user, pwd)) {
+            System.out.println("Verbindung erfolgreich!");
+
+            PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM student");
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                String email = rs.getString("email");
+                System.out.println(id + " | " + name + " | " + email);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Fehler beim Aufbau: " + e.getMessage());
+        }
+    }
+}
+
+```
+## ergebnis der erfolgreicehen verbindeung
+![img_1.png](img_1.png)
+
+# Video 5 
+
+```
+    public static void InsertStudent() {
+        String user = "user";
+        String pwd = "12345";
+        System.out.println("Insert Demo JDBC");
+
+        String connectionUrl = "jdbc:mysql://localhost:3306/jdbcdemo";
+
+        try (Connection conn = DriverManager.getConnection(connectionUrl, user, pwd)) {
+            System.out.println("Verbindung erfolgreich!");
+
+            String sql = "INSERT INTO student (id, name, email) VALUES (NULL, ?, ?)";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+
+            preparedStatement.setString(1, "Peter Zeck");
+            preparedStatement.setString(2, "Peter@gmail.com");
+
+            int rowsAffected = preparedStatement.executeUpdate();
+            System.out.println("Datensätze eingefügt: " + rowsAffected);
+
+        } catch (SQLException e) {
+            System.out.println("Fehler: " + e.getMessage());
+        }
+    }
+``` 
+## Ergebnis 
+![img_2.png](img_2.png)
