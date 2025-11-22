@@ -8,9 +8,11 @@ public class JdbcDemo {
 
     public static void main(String[] args) {
         selectAllDemo();
-        InsertStudent();
+        //InsertStudent();
         selectAllDemo();
         UpdateStudent();
+        selectAllDemo();
+        DeleteStudent(1);
         selectAllDemo();
 
 
@@ -87,6 +89,33 @@ public class JdbcDemo {
                 preparedStatement.setString(1, "tom Zimmer");
                 int rowsAffected = preparedStatement.executeUpdate();
                 System.out.println("Anzahl der aktualisierten: " + rowsAffected);
+
+            } catch (SQLException ex) {
+                System.out.println("Fehler: " + ex.getMessage());
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Fehler: " + e.getMessage());
+        }
+    }
+
+    public static void DeleteStudent(int studentid) {
+        String user = "user";
+        String pwd = "12345";
+        System.out.println("Delete Student Demo JDBC");
+
+        String connectionUrl = "jdbc:mysql://localhost:3306/jdbcdemo";
+
+        try (Connection conn = DriverManager.getConnection(connectionUrl, user, pwd)) {
+            System.out.println("Verbindung erfolgreich!");
+
+            String sql = "DELETE FROM student WHERE id = ?";
+            PreparedStatement preparedStatement = conn.prepareStatement(sql);
+
+            try {
+                preparedStatement.setInt(1, studentid);
+                int rowsAffected = preparedStatement.executeUpdate();
+                System.out.println("Anzahl der gelöschten Datensätze: " + rowsAffected);
 
             } catch (SQLException ex) {
                 System.out.println("Fehler: " + ex.getMessage());
