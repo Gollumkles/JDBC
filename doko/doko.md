@@ -201,3 +201,35 @@ public static void UpdateStudent() {
 }
 ``` 
 
+# Video 8
+## Ergebnis
+![img_5.png](img_5.png)
+## Code
+
+``` 
+    public static void selectName(String searchName){
+        String user = "user";
+        String pwd = "12345";
+        System.out.println("Find all by name Demo JDBC");
+
+        String connectionUrl = "jdbc:mysql://localhost:3306/jdbcdemo";
+
+        try (Connection conn = DriverManager.getConnection(connectionUrl, user, pwd)) {
+            System.out.println("Verbindung erfolgreich!");
+
+            PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM student WHERE name LIKE ?");
+            preparedStatement.setString(1,"%"+searchName+"%");
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                String email = rs.getString("email");
+                System.out.println(id + " | " + name + " | " + email);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Fehler beim Aufbau: " + e.getMessage());
+        }
+    }
+``` 
