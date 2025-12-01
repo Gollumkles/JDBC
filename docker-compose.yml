@@ -3,7 +3,7 @@ services:
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: 12345
-      MYSQL_DATABASE: jdbcdemo
+      MYSQL_DATABASE: imstkurssystem
       MYSQL_USER: user
       MYSQL_PASSWORD: 12345
     ports:
