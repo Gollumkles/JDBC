@@ -5,6 +5,7 @@ import Dataccess.MyCourseRepository;
 import domain.Course;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class CLI {
@@ -28,6 +29,10 @@ public class CLI {
                 case "2":
                     showAllCourses();
                     System.out.println("Alle Kurse anzeigen");
+                    break;
+
+                case "3":
+                    showCourseDetails();
                     break;
                 case "x":
                     System.out.println("Tschau");
@@ -61,14 +66,35 @@ public class CLI {
     }
 
 
+    private void showCourseDetails(){
+        System.out.println("Für welchen Kurs möchten Siedie Kurs Details anzeigen");
+        Long courseId = Long.parseLong((scan.nextLine()));
+
+        try {
+            Optional<Course> courseOptional = repo.getById(courseId);
+            if(courseOptional.isPresent())
+            {
+                System.out.println(courseOptional.get());
+            }else{
+                System.out.println("Kurse mit der ID" + courseId + "nicht gefunden");
+            }
+        } catch (DatabaseExeption databaseExeption) {
+            System.out.println("Datenbankfehler bei Kursanzeigen " + databaseExeption.getMessage());
+
+        }catch (Exception exception){
+            System.out.println("Unbekannterfehler" + exception.getMessage());
+        }
+    }
 
     private void showMenue() {
         System.out.println("------------Kurs Management-----------------------");
-        System.out.println("(1) Kurs Eingeben \t (2) Alle Kurse anzeigen");
+        System.out.println("(1) Kurs Eingeben \t (2) Alle Kurse anzeigen \t (3) nach id suchen");
         System.out.println("(x) ENDE");
     }
 
     private void inputError(){
         System.out.println("Bitte nur die Zahlen der Menüauswahl eingeben");
     }
+
+
 }

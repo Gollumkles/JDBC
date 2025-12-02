@@ -2,6 +2,7 @@ package Dataccess;
 
 import domain.Course;
 import domain.CourseTyp;
+import util.Assert;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -66,7 +67,45 @@ public class MySqlCourseRepository implements MyCourseRepository{
 
     @Override
     public Optional<Course> getById(Long id) {
-        return Optional.empty();
+        Assert.notNull(id);
+        if(countCoursesInDbWithId(id) == 0){
+            return Optional.empty();
+        }else{
+            try {
+                String sql = "SELECT * FROM `course` WHERE `id` = ?";
+                PreparedStatement preparedStatement = con.prepareStatement(sql);
+                preparedStatement.setLong(1,id);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                resultSet.next();
+                Course course = new Course(resultSet.getLong("id"),
+                        resultSet.getString("name"),
+                        resultSet.getString("description"),
+                        resultSet.getInt("hours"),
+                        resultSet.getDate("begindate"),
+                        resultSet.getDate("enddate"),
+                        CourseTyp.valueOf(resultSet.getString("coursetype")
+                )
+                );
+                return Optional.of(course);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+
+        }
+    }
+
+    private int countCoursesInDbWithId(Long id){
+        try {
+            String countSql = "SELECT * FROM `course` WHERE `id` = ?";
+            PreparedStatement preparedStatementCount = con.prepareStatement(countSql);
+            preparedStatementCount.setLong(1,id);
+            ResultSet resultSetCount = preparedStatementCount.executeQuery();
+            resultSetCount.next();
+            int courseCount = resultSetCount.getInt(1);
+            return courseCount;
+        } catch (SQLException e) {
+            return 0;        }
     }
 
     @Override
