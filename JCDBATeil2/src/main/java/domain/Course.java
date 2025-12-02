@@ -4,7 +4,8 @@ import javax.xml.crypto.Data;
 import java.sql.Date;
 
 public class Course extends BaseEntity{
-    private String name, descripection;
+    private String name;
+    private String descripection;
     private int hours;
     private Date beginDate;
     private Date endDate;
