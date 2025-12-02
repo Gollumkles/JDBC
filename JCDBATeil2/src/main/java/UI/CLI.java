@@ -1,12 +1,18 @@
 package UI;
 
+import Dataccess.MyCourseRepository;
+import domain.Course;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class CLI {
     Scanner scan;
+    MyCourseRepository repo;
 
-    public CLI() { // Konstruktor
+    public CLI(MyCourseRepository repo) { // Konstruktor
         this.scan = new Scanner(System.in);
+        this.repo = repo;
     }
 
     public void start() {
@@ -19,6 +25,7 @@ public class CLI {
                     System.out.println("Kurs eingabe");
                     break;
                 case "2":
+                    showAllCourses()
                     System.out.println("Alle Kurse anzeigen");
                     break;
                 case "x":
@@ -27,6 +34,17 @@ public class CLI {
                 default:
                     inputError();
                     break;
+            }
+        }
+    }
+
+    private void showAllCourses() {
+        List <Course> list = null;
+        list = repo.getAll();
+        if(list.size() > 0)
+        {
+            for(Course course : list){
+                System.out.println(course);
             }
         }
     }
