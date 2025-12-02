@@ -40,6 +40,12 @@ public class CLI {
                 case "3":
                     showCourseDetails();
                     break;
+                case "4":
+                    updateCourseDetails();
+                    break;
+                case "5":
+                    deleteCourse();
+                    break;
                 case "x":
                     System.out.println("Tschau");
                     break;
@@ -47,6 +53,70 @@ public class CLI {
                     inputError();
                     break;
             }
+        }
+    }
+
+    private void deleteCourse() {
+        System.out.println("Welchen Kurs möchten sie löschen");
+        Long courseIdToDelete = Long.parseLong((scan.nextLine()));
+
+        try{
+            repo.deleteById(courseIdToDelete);
+        }catch (Exception e){
+            System.out.println("Unbenkannter fehler" + e.getMessage());
+        }
+    }
+
+    private void updateCourseDetails() {
+        System.out.println("Für welchen Kurs möchten sie die Details ändern");
+        Long courseId = Long.parseLong(scan.nextLine());
+        try{
+
+            Optional<Course> courseOptional = repo.getById(courseId);
+            if(courseOptional.isEmpty()){
+                System.out.println("Kurs mit der Id ist nicht in der db");
+            }else{
+                Course course = courseOptional.get();
+                System.out.println(course);
+                String name, description, hours, dateFrom, dateTo, courseType;
+
+                System.out.println("Bitte neue Kursdaten angeben (Enter fallls keine änderung gewünscht ist)");
+                System.out.println("Name: ");
+                name = scan.nextLine();
+
+                System.out.println("description: ");
+                description = scan.nextLine();
+
+                System.out.println("hours: ");
+                hours = scan.nextLine();
+
+                System.out.println("Start Datum: ");
+                dateFrom = scan.nextLine();
+
+                System.out.println("End Datum: ");
+                dateTo = scan.nextLine();
+
+                System.out.println("Kurstyp ZA/BF/FF/OE");
+                courseType = scan.nextLine();
+
+                Optional<Course>   optionalCourseUpdated = repo.update(
+                        new Course(
+                        course.getID(),
+                        name.equals("") ? course.getName() : name,
+                        description.equals("") ? course.getDescripection() : description,
+                        hours.equals("") ? course.getHours() : Integer.parseInt(hours),
+                        dateFrom.equals("") ? course.getBeginDate() : Date.valueOf(dateFrom),
+                        dateTo.equals("") ? course.getBeginDate() : Date.valueOf(dateTo),
+                        courseType.equals("")?course.getCourseTyp() : CourseTyp.valueOf(courseType)
+                        )
+                );
+            optionalCourseUpdated.ifPresentOrElse(
+                    (c) -> System.out.println("Kurs aktualiesiet" + c),
+                    () -> System.out.println("Kurs konnte nicht aktualisiert werden")
+            );
+            }
+        }catch (Exception exception){
+            System.out.println("unbekannter fehler" + exception.getMessage());
         }
     }
 
@@ -143,7 +213,7 @@ public class CLI {
 
     private void showMenue() {
         System.out.println("------------Kurs Management-----------------------");
-        System.out.println("(1) Kurs Eingeben \t (2) Alle Kurse anzeigen \t (3) nach id suchen");
+        System.out.println("(1) Kurs Eingeben \t (2) Alle Kurse anzeigen \t (3) nach id suchen \t (4) Update \t(5) Löschen");
         System.out.println("(x) ENDE");
     }
 
