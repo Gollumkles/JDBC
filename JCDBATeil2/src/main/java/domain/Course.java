@@ -32,6 +32,8 @@ public class Course extends BaseEntity{
         this.setCourseTyp(courseTyp);
     }
 
+
+
     public String getName() {
         return name;
     }

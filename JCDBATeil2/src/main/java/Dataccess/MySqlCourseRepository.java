@@ -4,10 +4,7 @@ import domain.Course;
 import domain.CourseTyp;
 import util.Assert;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -62,7 +59,33 @@ public class MySqlCourseRepository implements MyCourseRepository{
 
     @Override
     public Optional<Course> insert(Course entity) {
-        return Optional.empty();
+        Assert.notNull(entity);
+        try {
+            String sql ="INSERT INTO `course` ( `name`, `description`, `hours`, `begindate`, `enddate` , `coursetype`) VAULES (ẞ,ẞ,ẞ,ẞ,ẞ,ẞ)";
+            PreparedStatement preparedStatement = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1,entity.getName());
+            preparedStatement.setString(2,entity.getDescripection());
+            preparedStatement.setInt(3,entity.getHours());
+            preparedStatement.setDate(4,entity.getBeginDate());
+            preparedStatement.setDate(5,entity.getEndDate());
+            preparedStatement.setString(6,entity.getCourseTyp().toString());
+
+            int affectedRows = preparedStatement.executeUpdate();
+
+            if (affectedRows == 0) {
+                return Optional.empty();
+            }
+
+            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+            if(generatedKeys.next()){
+                return this.getById(generatedKeys.getLong(1));
+            }else{
+                return Optional.empty();
+            }
+
+        }catch (SQLException sqlException){
+            throw new DatabaseExeption(sqlException.getMessage());
+        }
     }
 
     @Override

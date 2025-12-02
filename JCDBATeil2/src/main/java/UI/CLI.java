@@ -3,6 +3,11 @@ package UI;
 import Dataccess.DatabaseExeption;
 import Dataccess.MyCourseRepository;
 import domain.Course;
+import domain.CourseTyp;
+import domain.InvalidValueException;
+
+import javax.xml.crypto.Data;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +30,7 @@ public class CLI {
             switch (input) {
                 case "1":
                     System.out.println("Kurs eingabe");
+                    addCourse();
                     break;
                 case "2":
                     showAllCourses();
@@ -41,6 +47,55 @@ public class CLI {
                     inputError();
                     break;
             }
+        }
+    }
+
+    private void addCourse() {
+        String name, description;
+        int hours;
+        Date dateFrom, dateTo;
+        CourseTyp courseTyp;
+
+        try{
+            System.out.println("bitte alle kurs daten angeben");
+            System.out.println("Name: ");
+            name = scan.nextLine();
+            if (name.equals("")) throw new IllegalArgumentException(("Eingabe darf nict leer sein"));
+
+            System.out.println("description: ");
+            description = scan.nextLine();
+            if (description.equals("")) throw new IllegalArgumentException(("Eingabe darf nict leer sein"));
+
+            System.out.println("hours: ");
+            hours = Integer.parseInt(scan.nextLine());
+
+            System.out.println("Start Datum: ");
+            dateFrom = Date.valueOf(scan.nextLine());
+
+            System.out.println("End Datum: ");
+            dateTo = Date.valueOf(scan.nextLine());
+
+            System.out.println("Kurstyp ZA/BF/FF/OE");
+            courseTyp = CourseTyp.valueOf(scan.nextLine());
+
+            Optional<Course> optionalCourse = repo.insert(
+                    new Course(name,description,hours,dateFrom,dateTo,courseTyp)
+            );
+
+            if(optionalCourse.isPresent()){
+                System.out.println("Kurs angelegt" + optionalCourse.get());
+            }else{
+                System.out.println("Kurs könnte nicht angelegt werden");
+            }
+
+        }catch (IllegalArgumentException illegalArgumentException){
+            System.out.println("Eingabefehler" + illegalArgumentException);
+        }catch (InvalidValueException invalidValueException){
+            System.out.println("Kursdaten nicht korrejt" + invalidValueException.getMessage());
+        }catch (DatabaseExeption databaseExeption){
+            System.out.println("Datenbankfehler beim Einfügen" + databaseExeption.getMessage());
+        }catch (Exception exception){
+            System.out.println("Unbekannter fehler" + exception.getMessage());
         }
     }
 
