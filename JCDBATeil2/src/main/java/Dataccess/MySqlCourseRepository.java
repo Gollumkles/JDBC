@@ -17,7 +17,7 @@ public class MySqlCourseRepository implements MyCourseRepository {
     public MySqlCourseRepository() {
         try {
             this.con = MysqlDatabaseConnection.getConnection(
-                    "jdbc:mysql://localhost:3306/imstkurssystem", "user", "12345");
+                    "jdbc:mysql://localhost:3306/imstkurssystem", "root", "12345");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -178,7 +178,7 @@ public class MySqlCourseRepository implements MyCourseRepository {
         Assert.notNull(id);
         String sql ="DELETE FROM `course` WHERE  `id` = ?";
         try{
-            if(countCoursesInDbWithId(id) == 0){
+            if(countCoursesInDbWithId(id) > 0){
                 PreparedStatement preparedStatement = con.prepareStatement(sql);
                 preparedStatement.setLong(1, id);
                 preparedStatement.executeUpdate();
