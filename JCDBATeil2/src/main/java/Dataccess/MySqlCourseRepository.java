@@ -16,7 +16,7 @@ public class MySqlCourseRepository implements MyCourseRepository{
     
     private Connection con;
 
-    public MySqlCourseRepository(Connection con) {
+    public MySqlCourseRepository() {
 
         try {
             this.con = MysqlDatabaseConnection.getConnection(
@@ -27,6 +27,7 @@ public class MySqlCourseRepository implements MyCourseRepository{
             throw new RuntimeException(e);
         }
     }
+
 
     @Override
     public List<Course> findAllCoursesByName(String name) {
@@ -70,31 +71,31 @@ public class MySqlCourseRepository implements MyCourseRepository{
 
     @Override
     public List<Course> getAll() {
-        String sql = "SELECT * FROM 'course";
-        try {
-            PreparedStatement preparedStatement = con.prepareStatement(sql);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            ArrayList<Course> courseList = new ArrayList<>();
-            while (resultSet.next())
-            {
-                courseList.add(new Course(
-                        resultSet.getLong("id"),
-                        resultSet.getString("name"),
-                        resultSet.getString("description"),
-                        resultSet.getInt("hours"),
-                        resultSet.getDate("begindate"),
-                        resultSet.getDate("enddate"),
-                        CourseTyp.valueOf(resultSet.getString("coursetype"))
-                        )
+        String sql = "SELECT * FROM course";
 
-                );
-                return courseList;
+        try (PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            List<Course> courseList = new ArrayList<>();
+
+            while (rs.next()) {
+                courseList.add(new Course(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getInt("hours"),
+                        rs.getDate("begindate"),
+                        rs.getDate("enddate"),
+                        CourseTyp.valueOf(rs.getString("coursetype"))
+                ));
             }
+            return courseList;
+
         } catch (SQLException e) {
-            throw new DatabaseExeption("Database error occured!");
+            throw new DatabaseExeption("Database error occured: " + e.getMessage());
         }
-        return null;
     }
+
 
     @Override
     public Optional<Course> update(Course entity) {
