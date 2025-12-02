@@ -1,5 +1,6 @@
 package UI;
 
+import Dataccess.DatabaseExeption;
 import Dataccess.MyCourseRepository;
 import domain.Course;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class CLI {
                     System.out.println("Kurs eingabe");
                     break;
                 case "2":
-                    showAllCourses()
+                    showAllCourses();
                     System.out.println("Alle Kurse anzeigen");
                     break;
                 case "x":
@@ -40,14 +41,26 @@ public class CLI {
 
     private void showAllCourses() {
         List <Course> list = null;
-        list = repo.getAll();
-        if(list.size() > 0)
-        {
-            for(Course course : list){
-                System.out.println(course);
+        try{
+
+            list = repo.getAll();
+            if(list.size() > 0)
+            {
+                for(Course course : list){
+                    System.out.println(course);
+                }
+            }else {
+                System.out.println("Kurs leer");
             }
-        }
+        } catch(DatabaseExeption databaseException)
+            {
+                System.out.println("Datenbankkfehler " + databaseException.getMessage());
+            } catch(Exception exception){
+                System.out.println("unbekannterfehler" + exception.getMessage());
+            }
     }
+
+
 
     private void showMenue() {
         System.out.println("------------Kurs Management-----------------------");
