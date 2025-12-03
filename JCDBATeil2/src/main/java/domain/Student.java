@@ -1,23 +1,25 @@
 package domain;
-import java.sql.Date;
+
+import java.time.LocalDate;
 
 public class Student {
-    Long studentId;
-    String vorname;
-    String nachname;
-    Date Birthday;
 
-    public Student(Long studentId, String vorname, String nachname, Date birthday) {
-        this.studentId = studentId;
-        this.vorname = vorname;
-        this.nachname = nachname;
-        Birthday = birthday;
+    private Long studentId;
+    private String vorname;
+    private String nachname;
+    private LocalDate birthday;
+
+    public Student(Long studentId, String vorname, String nachname, LocalDate birthday) {
+        setStudentId(studentId);
+        setVorname(vorname);
+        setNachname(nachname);
+        setBirthday(birthday);
     }
 
-    public Student(String vorname, String nachname, Date birthday) {
-        this.vorname = vorname;
-        this.nachname = nachname;
-        Birthday = birthday;
+    public Student(String vorname, String nachname, LocalDate birthday) {
+        setVorname(vorname);
+        setNachname(nachname);
+        setBirthday(birthday);
     }
 
     public Long getStudentId() {
@@ -25,6 +27,9 @@ public class Student {
     }
 
     public void setStudentId(Long studentId) {
+        if (studentId != null && studentId <= 0) {
+            throw new InvalidStudentDataException("Student-ID muss positiv sein.");
+        }
         this.studentId = studentId;
     }
 
@@ -33,7 +38,10 @@ public class Student {
     }
 
     public void setVorname(String vorname) {
-        this.vorname = vorname;
+        if (vorname == null || vorname.trim().isEmpty()) {
+            throw new InvalidStudentDataException("Vorname darf nicht leer sein.");
+        }
+        this.vorname = vorname.trim();
     }
 
     public String getNachname() {
@@ -41,14 +49,33 @@ public class Student {
     }
 
     public void setNachname(String nachname) {
-        this.nachname = nachname;
+        if (nachname == null || nachname.trim().isEmpty()) {
+            throw new InvalidStudentDataException("Nachname darf nicht leer sein.");
+        }
+        this.nachname = nachname.trim();
     }
 
-    public Date getBirthday() {
-        return Birthday;
+    public LocalDate getBirthday() {
+        return birthday;
     }
 
-    public void setBirthday(Date birthday) {
-        Birthday = birthday;
+    public void setBirthday(LocalDate birthday) {
+        if (birthday == null) {
+            throw new InvalidStudentDataException("Geburtsdatum darf nicht null sein.");
+        }
+        if (birthday.isAfter(LocalDate.now())) {
+            throw new InvalidStudentDataException("Geburtsdatum darf nicht in der Zukunft liegen.");
+        }
+        this.birthday = birthday;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "studentId=" + studentId +
+                ", vorname='" + vorname + '\'' +
+                ", nachname='" + nachname + '\'' +
+                ", birthday=" + birthday +
+                '}';
     }
 }
