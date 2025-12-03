@@ -86,6 +86,7 @@ public class Course extends BaseEntity{
         this.courseTyp = courseTyp;
     }
 
+
     @Override
     public String toString() {
         return "Course{" +

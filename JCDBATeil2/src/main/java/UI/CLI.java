@@ -49,6 +49,9 @@ public class CLI {
                 case "6":
                     courseSearch();
                     break;
+                case "7":
+                    runningCourses();
+                    break;;
                 case "x":
                     System.out.println("Tschau");
                     break;
@@ -57,6 +60,19 @@ public class CLI {
                     break;
             }
         }
+    }
+
+    private void runningCourses() {
+        System.out.println("Laufende Kurse");
+        List<Course> list;
+        try{
+            list = repo.findAll
+        }catch (DatabaseExeption databaseExeption){
+            System.out.println("Fehler beim zugriff auf db" + databaseExeption.getMessage());
+        }catch (Exception exception){
+            System.out.println("undefinierter fehler" + exception.getMessage());
+        }
+
     }
 
     private void courseSearch() {
@@ -230,7 +246,7 @@ public class CLI {
 
     private void showMenue() {
         System.out.println("------------Kurs Management-----------------------");
-        System.out.println("(1) Kurs Eingeben \t (2) Alle Kurse anzeigen \t (3) nach id suchen \t (4) Update \t(5) Löschen \t (6) ");
+        System.out.println("(1) Kurs Eingeben \t (2) Alle Kurse anzeigen \t (3) nach id suchen \t (4) Update \t(5) Löschen \t (6)genaue suche \t (7) Laufende Kurse");
         System.out.println("(x) ENDE");
     }
 
