@@ -1,30 +1,12 @@
 package Dataccess;
 
+import domain.Student;
 import java.util.List;
-import java.util.Optional;
+import java.sql.Date;
 
-public interface MyStudentRepository extends BaseRepository {
+public interface MyStudentRepository extends BaseRepository<Student,Long> {
 
-    @Override
-    Optional insert(Object entity);
-
-    @Override
-    Optional getById(Object id);
-
-    @Override
-    List getAll();
-
-    @Override
-    Optional update(Object entity);
-
-    @Override
-    void deleteById(Object id);
-
-    void searchByVorame(Object vorname);
-
-    void searchByBirthday(Object birthday);
-
-    void searchByNachname(Object nachname);
-
-
+    List<Student> searchByStudentVorname(String vorname);
+    List<Student> searchByStudentBirthday(Date birthday);
+    List<Student> searchByStudentID(Long id);
 }
