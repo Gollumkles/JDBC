@@ -51,7 +51,7 @@ public class CLI {
                     break;
                 case "7":
                     runningCourses();
-                    break;;
+                    break;
                 case "x":
                     System.out.println("Tschau");
                     break;
@@ -66,7 +66,7 @@ public class CLI {
         System.out.println("Laufende Kurse");
         List<Course> list;
         try{
-            list = repo.findAll
+
         }catch (DatabaseExeption databaseExeption){
             System.out.println("Fehler beim zugriff auf db" + databaseExeption.getMessage());
         }catch (Exception exception){

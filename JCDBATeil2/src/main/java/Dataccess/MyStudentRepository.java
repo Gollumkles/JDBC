@@ -29,4 +29,16 @@ public class MyStudentRepository implements BaseRepository{
     public void deleteById(Object id) {
 
     }
+
+    public void searchByVorame(Object vorname){
+
+    }
+
+    public void searchByBirthday(Object birthday){
+
+    }
+
+    public void searchByNachname(Object nachname){
+
+    }
 }

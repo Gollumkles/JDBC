@@ -23,7 +23,6 @@ public class MySqlCourseRepository implements MyCourseRepository {
         }
     }
 
-    // ------------------------- INSERT -------------------------
 
     @Override
     public Optional<Course> insert(Course entity) {
@@ -59,7 +58,6 @@ public class MySqlCourseRepository implements MyCourseRepository {
         }
     }
 
-    // ------------------------- GET BY ID -------------------------
 
     @Override
     public Optional<Course> getById(Long id) {
@@ -93,7 +91,6 @@ public class MySqlCourseRepository implements MyCourseRepository {
         }
     }
 
-    // ------------------------- COUNT -------------------------
 
     private int countCoursesInDbWithId(Long id) {
         String sql = "SELECT COUNT(*) FROM `course` WHERE `id` = ?";
@@ -108,7 +105,6 @@ public class MySqlCourseRepository implements MyCourseRepository {
         }
     }
 
-    // ------------------------- GET ALL -------------------------
 
     @Override
     public List<Course> getAll() {
@@ -137,7 +133,6 @@ public class MySqlCourseRepository implements MyCourseRepository {
         }
     }
 
-    // ------------------------- UPDATE -------------------------
 
     @Override
     public Optional<Course> update(Course entity) {
@@ -171,7 +166,6 @@ public class MySqlCourseRepository implements MyCourseRepository {
         }
     }
 
-    // ------------------------- DELETE -------------------------
 
     @Override
     public void deleteById(Long id) {
@@ -190,7 +184,6 @@ public class MySqlCourseRepository implements MyCourseRepository {
 
     }
 
-    // ------------------------- SEARCH (noch leer) -------------------------
 
     @Override
     public List<Course> findAllCoursesByName(String name) {
