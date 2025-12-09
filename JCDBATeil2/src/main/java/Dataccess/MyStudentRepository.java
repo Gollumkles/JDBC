@@ -3,42 +3,28 @@ package Dataccess;
 import java.util.List;
 import java.util.Optional;
 
-public class MyStudentRepository implements BaseRepository{
+public interface MyStudentRepository extends BaseRepository {
 
     @Override
-    public Optional insert(Object entity) {
-        return Optional.empty();
-    }
+    Optional insert(Object entity);
 
     @Override
-    public Optional getById(Object id) {
-        return Optional.empty();
-    }
+    Optional getById(Object id);
 
     @Override
-    public List getAll() {
-        return List.of();
-    }
+    List getAll();
 
     @Override
-    public Optional update(Object entity) {
-        return Optional.empty();
-    }
+    Optional update(Object entity);
 
     @Override
-    public void deleteById(Object id) {
+    void deleteById(Object id);
 
-    }
+    void searchByVorame(Object vorname);
 
-    public void searchByVorame(Object vorname){
+    void searchByBirthday(Object birthday);
 
-    }
+    void searchByNachname(Object nachname);
 
-    public void searchByBirthday(Object birthday){
 
-    }
-
-    public void searchByNachname(Object nachname){
-
-    }
 }
