@@ -2,13 +2,13 @@ package UI;
 
 import Dataccess.DatabaseExeption;
 import Dataccess.MyCourseRepository;
+import Dataccess.MySqlStudentRepository;
 import domain.Course;
 import domain.CourseTyp;
 import domain.InvalidValueException;
+import domain.Student;
 
-import javax.xml.crypto.Data;
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -16,11 +16,14 @@ import java.util.Scanner;
 public class CLI {
     Scanner scan;
     MyCourseRepository repo;
+    MySqlStudentRepository studi;
 
-    public CLI(MyCourseRepository repo) { // Konstruktor
+    public CLI(MyCourseRepository repo, MySqlStudentRepository studi) {
         this.scan = new Scanner(System.in);
         this.repo = repo;
+        this.studi = studi;
     }
+
 
     public void start() {
         String input = "-";
@@ -52,6 +55,9 @@ public class CLI {
                 case "7":
                     runningCourses();
                     break;
+                case "8":
+                    searchStudentById();
+                    break;
                 case "x":
                     System.out.println("Tschau");
                     break;
@@ -61,6 +67,28 @@ public class CLI {
             }
         }
     }
+
+    private void searchStudentById() {
+        System.out.println("Bitte Student-ID eingeben:");
+        Long id = Long.parseLong(scan.nextLine());
+
+        try {
+            List<Student> list = studi.searchByStudentID(id);
+
+            if (list.isEmpty()) {
+                System.out.println("Kein Student mit dieser ID gefunden.");
+            } else {
+                list.forEach(System.out::println);
+            }
+
+        } catch (DatabaseExeption e) {
+            System.out.println("Datenbankfehler: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Unbekannter Fehler: " + e.getMessage());
+        }
+    }
+
+
 
     private void runningCourses() {
         System.out.println("Laufende Kurse");

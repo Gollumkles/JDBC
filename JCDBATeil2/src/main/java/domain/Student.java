@@ -1,22 +1,22 @@
 package domain;
 
-import java.time.LocalDate;
+import java.sql.Date;
 
 public class Student {
 
     private Long studentId;
     private String vorname;
     private String nachname;
-    private LocalDate birthday;
+    private Date birthday;
 
-    public Student(Long studentId, String vorname, String nachname, LocalDate birthday) {
+    public Student(Long studentId, String vorname, String nachname, Date birthday) {
         setStudentId(studentId);
         setVorname(vorname);
         setNachname(nachname);
         setBirthday(birthday);
     }
 
-    public Student(String vorname, String nachname, LocalDate birthday) {
+    public Student(String vorname, String nachname, Date birthday) {
         setVorname(vorname);
         setNachname(nachname);
         setBirthday(birthday);
@@ -55,19 +55,25 @@ public class Student {
         this.nachname = nachname.trim();
     }
 
-    public LocalDate getBirthday() {
+    public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(LocalDate birthday) {
+    public void setBirthday(java.sql.Date birthday) {
         if (birthday == null) {
             throw new InvalidStudentDataException("Geburtsdatum darf nicht null sein.");
         }
-        if (birthday.isAfter(LocalDate.now())) {
+
+        // aktuelles Datum als Millisekunden
+        long now = System.currentTimeMillis();
+
+        if (birthday.getTime() > now) {
             throw new InvalidStudentDataException("Geburtsdatum darf nicht in der Zukunft liegen.");
         }
+
         this.birthday = birthday;
     }
+
 
     @Override
     public String toString() {
