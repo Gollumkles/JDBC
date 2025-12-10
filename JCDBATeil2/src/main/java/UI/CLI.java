@@ -3,10 +3,7 @@ package UI;
 import Dataccess.DatabaseExeption;
 import Dataccess.MyCourseRepository;
 import Dataccess.MySqlStudentRepository;
-import domain.Course;
-import domain.CourseTyp;
-import domain.InvalidValueException;
-import domain.Student;
+import domain.*;
 
 import java.sql.Date;
 import java.util.List;
@@ -58,6 +55,12 @@ public class CLI {
                 case "8":
                     searchStudentById();
                     break;
+                case "9":
+                    searchStudentByVorname();
+                    break;
+                case "10":
+                    insertStudent();
+                    break;
                 case "x":
                     System.out.println("Tschau");
                     break;
@@ -68,17 +71,74 @@ public class CLI {
         }
     }
 
+    private void insertStudent() {
+        String vorname, nachname;
+        Date birthday;
+
+        try{
+            System.out.println("Bitte geben sie den vornamen ein");
+            vorname = scan.nextLine();
+
+            System.out.println("Bitte geben sie den nachnamen ein");
+            nachname = scan.nextLine();
+
+            System.out.println("Bitte geben sie das Datum ein");
+            birthday = Date.valueOf(scan.nextLine());
+
+            Optional<Student> optionalStudent = studi.insert(
+                    new Student(
+                            vorname, nachname, birthday
+                    )
+            );
+            if(optionalStudent.isPresent()){
+                System.out.println("Kurs angelegt" + optionalStudent.get());
+            }else{
+                System.out.println("Kurs könnte nicht angelegt werden");
+            }
+
+        }catch (IllegalArgumentException illegalArgumentException){
+            System.out.println("Eingabefehler" + illegalArgumentException);
+        } catch (InvalidStudentDataException invalidStudentException) {
+            System.out.println("Studentendaten nicht korrekt: " + invalidStudentException.getMessage());
+        } catch (DatabaseExeption databaseExeption){
+            System.out.println("Datenbankfehler beim Einfügen" + databaseExeption.getMessage());
+        }catch (Exception exception){
+            System.out.println("Unbekannter fehler" + exception.getMessage());
+        }
+        }
+
+
+
+    private void searchStudentByVorname() {
+        System.out.println("Gebden sie einen Vornamen ein");
+        String vorname = scan.nextLine();
+        try{
+            List<Student> list = studi.searchByStudentVorname(vorname);
+            if(list.isEmpty()){
+                System.out.println("keinen studenten mit diesem vornamen gefunden");
+            }else {
+                list.forEach(System.out::println);
+            }
+        } catch (DatabaseExeption e) {
+            System.out.println("Datenbankfehler: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Unbekannter Fehler: " + e.getMessage());
+        }
+
+
+    }
+
     private void searchStudentById() {
         System.out.println("Bitte Student-ID eingeben:");
         Long id = Long.parseLong(scan.nextLine());
 
         try {
-            List<Student> list = studi.searchByStudentID(id);
+            Optional<Student> optionalStudent = studi.searchByStudentID(id);
 
-            if (list.isEmpty()) {
+            if (optionalStudent.isEmpty()) {
                 System.out.println("Kein Student mit dieser ID gefunden.");
             } else {
-                list.forEach(System.out::println);
+                System.out.println(optionalStudent.get());
             }
 
         } catch (DatabaseExeption e) {
@@ -87,6 +147,7 @@ public class CLI {
             System.out.println("Unbekannter Fehler: " + e.getMessage());
         }
     }
+
 
 
 
