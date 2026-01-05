@@ -27,11 +27,12 @@ public class Student {
     }
 
     public void setStudentId(Long studentId) {
-        if (studentId != null && studentId <= 0) {
-            throw new InvalidStudentDataException("Student-ID muss positiv sein.");
+        if (studentId != null && studentId < 1) {
+            throw new InvalidStudentDataException("Student-ID muss >= 1 sein.");
         }
         this.studentId = studentId;
     }
+
 
     public String getVorname() {
         return vorname;

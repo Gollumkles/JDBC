@@ -185,54 +185,153 @@ public class MySqlCourseRepository implements MyCourseRepository {
     }
 
 
+
+
+    @Override
+    public List<Course> findAllCoursesByNameOrDescription(String searchText) {
+        Assert.notNull(searchText);
+
+        String sql = "SELECT * FROM `course` " +
+                "WHERE LOWER(`description`) LIKE LOWER(?) OR LOWER(`name`) LIKE LOWER(?)";
+
+        try (PreparedStatement preparedStatement = con.prepareStatement(sql)) {
+            preparedStatement.setString(1, "%" + searchText + "%");
+            preparedStatement.setString(2, "%" + searchText + "%");
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                ArrayList<Course> courseList = new ArrayList<>();
+
+                while (resultSet.next()) {
+                    courseList.add(new Course(
+                            resultSet.getLong("id"),
+                            resultSet.getString("name"),
+                            resultSet.getString("description"),
+                            resultSet.getInt("hours"),
+                            resultSet.getDate("begindate"),
+                            resultSet.getDate("enddate"),
+                            CourseTyp.valueOf(resultSet.getString("coursetype"))
+                    ));
+                }
+                return courseList;
+            }
+
+        } catch (SQLException sqlException) {
+            throw new DatabaseExeption(sqlException.getMessage());
+        }
+    }
+
     @Override
     public List<Course> findAllCoursesByName(String name) {
-        return List.of();
+        Assert.notNull(name);
+        String sql = "SELECT * FROM `course` WHERE LOWER(`name`) LIKE LOWER(?)";
+
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setString(1, "%" + name + "%");
+            try (ResultSet rs = stmt.executeQuery()) {
+                ArrayList<Course> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(new Course(
+                            rs.getLong("id"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getInt("hours"),
+                            rs.getDate("begindate"),
+                            rs.getDate("enddate"),
+                            CourseTyp.valueOf(rs.getString("coursetype"))
+                    ));
+                }
+                return list;
+            }
+        } catch (SQLException e) {
+            throw new DatabaseExeption("findAllCoursesByName Fehler: " + e.getMessage());
+        }
     }
 
     @Override
     public List<Course> findAllCoursesByDescription(String description) {
-        return List.of();
-    }
+        Assert.notNull(description);
+        String sql = "SELECT * FROM `course` WHERE LOWER(`description`) LIKE LOWER(?)";
 
-    @Override
-    public List<Course> findAllCoursesByNameOrDescription(String searchText) {
-        try {
-            String sql = "SELECT * FROM `course`WHERE LOWER(`description`) LIKE LOWER(?) OR LOWER(`name`) LIKE LOWER(?)";
-            PreparedStatement preparedStatement = con.prepareStatement(sql);
-            preparedStatement.setString(1, "%" + searchText + "%");
-            preparedStatement.setString(2, "%" + searchText + "%");
-            ResultSet resultSet = preparedStatement.executeQuery();
-            ArrayList<Course> courseList = new ArrayList<>();
-
-            while (resultSet.next()) {
-                courseList.add(new Course(
-                        resultSet.getLong("id"),
-                        resultSet.getString("name"),
-                        resultSet.getString("description"),
-                        resultSet.getInt("hours"),
-                        resultSet.getDate("begindate"),
-                        resultSet.getDate("enddate"),
-                        CourseTyp.valueOf(resultSet.getString("coursetype"))
-                ));
-
-
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setString(1, "%" + description + "%");
+            try (ResultSet rs = stmt.executeQuery()) {
+                ArrayList<Course> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(new Course(
+                            rs.getLong("id"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getInt("hours"),
+                            rs.getDate("begindate"),
+                            rs.getDate("enddate"),
+                            CourseTyp.valueOf(rs.getString("coursetype"))
+                    ));
+                }
+                return list;
             }
-        } catch (SQLException sqlException) {
-            throw new DatabaseExeption(sqlException.getMessage());
+        } catch (SQLException e) {
+            throw new DatabaseExeption("findAllCoursesByDescription Fehler: " + e.getMessage());
         }
-        return List.of();
     }
 
     @Override
     public List<Course> findAllCoursesByCourseId(CourseTyp courseTyp) {
-        return List.of();
+        Assert.notNull(courseTyp);
+        String sql = "SELECT * FROM `course` WHERE `coursetype` = ?";
+
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setString(1, courseTyp.toString());
+            try (ResultSet rs = stmt.executeQuery()) {
+                ArrayList<Course> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(new Course(
+                            rs.getLong("id"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getInt("hours"),
+                            rs.getDate("begindate"),
+                            rs.getDate("enddate"),
+                            CourseTyp.valueOf(rs.getString("coursetype"))
+                    ));
+                }
+                return list;
+            }
+        } catch (SQLException e) {
+            throw new DatabaseExeption("findAllCoursesByCourseId Fehler: " + e.getMessage());
+        }
     }
 
     @Override
     public List<Course> findAllCoursesByStartDate(Date startDate) {
-        return List.of();
+        Assert.notNull(startDate);
+
+        // Interface nimmt java.util.Date, DB braucht java.sql.Date:
+        java.sql.Date sqlDate = new java.sql.Date(startDate.getTime());
+
+        String sql = "SELECT * FROM `course` WHERE `begindate` = ?";
+
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setDate(1, sqlDate);
+            try (ResultSet rs = stmt.executeQuery()) {
+                ArrayList<Course> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(new Course(
+                            rs.getLong("id"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getInt("hours"),
+                            rs.getDate("begindate"),
+                            rs.getDate("enddate"),
+                            CourseTyp.valueOf(rs.getString("coursetype"))
+                    ));
+                }
+                return list;
+            }
+        } catch (SQLException e) {
+            throw new DatabaseExeption("findAllCoursesByStartDate Fehler: " + e.getMessage());
+        }
     }
+
 
     public List<Course> findAllRunningCourses() {
         String sql = "SELECT * FROM `course` WHERE NOW() < `enddate`";

@@ -3,7 +3,11 @@ package UI;
 import Dataccess.DatabaseExeption;
 import Dataccess.MyCourseRepository;
 import Dataccess.MySqlStudentRepository;
-import domain.*;
+import domain.Course;
+import domain.CourseTyp;
+import domain.InvalidStudentDataException;
+import domain.InvalidValueException;
+import domain.Student;
 
 import java.sql.Date;
 import java.util.List;
@@ -11,9 +15,9 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class CLI {
-    Scanner scan;
-    MyCourseRepository repo;
-    MySqlStudentRepository studi;
+    private final Scanner scan;
+    private final MyCourseRepository repo;
+    private final MySqlStudentRepository studi;
 
     public CLI(MyCourseRepository repo, MySqlStudentRepository studi) {
         this.scan = new Scanner(System.in);
@@ -21,24 +25,21 @@ public class CLI {
         this.studi = studi;
     }
 
-
     public void start() {
         String input = "-";
-        while (!input.equals("x")) {   // richtige Schleifenbedingung
+        while (!input.equals("x")) {
             showMenue();
             input = scan.nextLine();
+
             switch (input) {
                 case "1":
-                    System.out.println("Kurs eingabe");
-                    addCourse();
+                    showAllCourses();
                     break;
                 case "2":
-                    showAllCourses();
-                    System.out.println("Alle Kurse anzeigen");
+                    courseSearch();
                     break;
-
                 case "3":
-                    showCourseDetails();
+                    addCourse();
                     break;
                 case "4":
                     updateCourseDetails();
@@ -47,301 +48,275 @@ public class CLI {
                     deleteCourse();
                     break;
                 case "6":
-                    courseSearch();
+                    showAllStudents();
                     break;
                 case "7":
-                    runningCourses();
+                    findStudentByName();
                     break;
                 case "8":
-                    searchStudentById();
+                    addStudent();
                     break;
                 case "9":
-                    searchStudentByVorname();
+                    updateStudent();
                     break;
                 case "10":
-                    insertStudent();
+                    deleteStudent();
                     break;
                 case "x":
-                    System.out.println("Tschau");
+                    System.out.println("Auf Wiedersehen!");
                     break;
                 default:
-                    inputError();
-                    break;
+                    System.out.println("Ungültige Eingabe!");
             }
         }
     }
 
-    private void insertStudent() {
-        String vorname, nachname;
-        Date birthday;
-
-        try{
-            System.out.println("Bitte geben sie den vornamen ein");
-            vorname = scan.nextLine();
-
-            System.out.println("Bitte geben sie den nachnamen ein");
-            nachname = scan.nextLine();
-
-            System.out.println("Bitte geben sie das Datum ein");
-            birthday = Date.valueOf(scan.nextLine());
-
-            Optional<Student> optionalStudent = studi.insert(
-                    new Student(
-                            vorname, nachname, birthday
-                    )
-            );
-            if(optionalStudent.isPresent()){
-                System.out.println("Kurs angelegt" + optionalStudent.get());
-            }else{
-                System.out.println("Kurs könnte nicht angelegt werden");
-            }
-
-        }catch (IllegalArgumentException illegalArgumentException){
-            System.out.println("Eingabefehler" + illegalArgumentException);
-        } catch (InvalidStudentDataException invalidStudentException) {
-            System.out.println("Studentendaten nicht korrekt: " + invalidStudentException.getMessage());
-        } catch (DatabaseExeption databaseExeption){
-            System.out.println("Datenbankfehler beim Einfügen" + databaseExeption.getMessage());
-        }catch (Exception exception){
-            System.out.println("Unbekannter fehler" + exception.getMessage());
-        }
-        }
-
-
-
-    private void searchStudentByVorname() {
-        System.out.println("Gebden sie einen Vornamen ein");
-        String vorname = scan.nextLine();
-        try{
-            List<Student> list = studi.searchByStudentVorname(vorname);
-            if(list.isEmpty()){
-                System.out.println("keinen studenten mit diesem vornamen gefunden");
-            }else {
-                list.forEach(System.out::println);
-            }
-        } catch (DatabaseExeption e) {
-            System.out.println("Datenbankfehler: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Unbekannter Fehler: " + e.getMessage());
-        }
-
-
-    }
-
-    private void searchStudentById() {
-        System.out.println("Bitte Student-ID eingeben:");
-        Long id = Long.parseLong(scan.nextLine());
-
-        try {
-            Optional<Student> optionalStudent = studi.searchByStudentID(id);
-
-            if (optionalStudent.isEmpty()) {
-                System.out.println("Kein Student mit dieser ID gefunden.");
-            } else {
-                System.out.println(optionalStudent.get());
-            }
-
-        } catch (DatabaseExeption e) {
-            System.out.println("Datenbankfehler: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Unbekannter Fehler: " + e.getMessage());
-        }
-    }
-
-
-
-
-    private void runningCourses() {
-        System.out.println("Laufende Kurse");
-        List<Course> list;
-        try{
-
-        }catch (DatabaseExeption databaseExeption){
-            System.out.println("Fehler beim zugriff auf db" + databaseExeption.getMessage());
-        }catch (Exception exception){
-            System.out.println("undefinierter fehler" + exception.getMessage());
-        }
-
-    }
+    // ---------------- KURSE ----------------
 
     private void courseSearch() {
-        System.out.println("Geben Sie einen Suchbegriff an");
+        System.out.println("Geben Sie einen Suchbegriff an:");
         String searchString = scan.nextLine();
-        List<Course> courseList;
-        try{
-            courseList = repo.findAllCoursesByNameOrDescription(searchString);
-            for(Course course : courseList){
-                System.out.println(courseList);
+        try {
+            List<Course> courseList = repo.findAllCoursesByNameOrDescription(searchString);
+            if (courseList.isEmpty()) {
+                System.out.println("Keine Kurse gefunden.");
+            } else {
+                for (Course course : courseList) {
+                    System.out.println(course);
+                }
             }
-        }catch (DatabaseExeption databaseExeption){
-            System.out.println("Datenbankfehler bei der Kurssuche" + databaseExeption.getMessage());
+        } catch (DatabaseExeption e) {
+            System.out.println("Datenbankfehler bei der Kurssuche: " + e.getMessage());
         }
     }
 
     private void deleteCourse() {
-        System.out.println("Welchen Kurs möchten sie löschen");
-        Long courseIdToDelete = Long.parseLong((scan.nextLine()));
-
-        try{
+        System.out.println("Welchen Kurs möchten Sie löschen? (ID)");
+        Long courseIdToDelete = Long.parseLong(scan.nextLine());
+        try {
             repo.deleteById(courseIdToDelete);
-        }catch (Exception e){
-            System.out.println("Unbenkannter fehler" + e.getMessage());
+            System.out.println("Kurs gelöscht (wenn vorhanden).");
+        } catch (Exception e) {
+            System.out.println("Fehler: " + e.getMessage());
         }
     }
 
     private void updateCourseDetails() {
-        System.out.println("Für welchen Kurs möchten sie die Details ändern");
+        System.out.println("Für welchen Kurs möchten Sie die Details ändern? (ID)");
         Long courseId = Long.parseLong(scan.nextLine());
-        try{
 
+        try {
             Optional<Course> courseOptional = repo.getById(courseId);
-            if(courseOptional.isEmpty()){
-                System.out.println("Kurs mit der Id ist nicht in der db");
-            }else{
-                Course course = courseOptional.get();
-                System.out.println(course);
-                String name, description, hours, dateFrom, dateTo, courseType;
-
-                System.out.println("Bitte neue Kursdaten angeben (Enter fallls keine änderung gewünscht ist)");
-                System.out.println("Name: ");
-                name = scan.nextLine();
-
-                System.out.println("description: ");
-                description = scan.nextLine();
-
-                System.out.println("hours: ");
-                hours = scan.nextLine();
-
-                System.out.println("Start Datum: ");
-                dateFrom = scan.nextLine();
-
-                System.out.println("End Datum: ");
-                dateTo = scan.nextLine();
-
-                System.out.println("Kurstyp ZA/BF/FF/OE");
-                courseType = scan.nextLine();
-
-                Optional<Course>   optionalCourseUpdated = repo.update(
-                        new Course(
-                        course.getID(),
-                        name.equals("") ? course.getName() : name,
-                        description.equals("") ? course.getDescripection() : description,
-                        hours.equals("") ? course.getHours() : Integer.parseInt(hours),
-                        dateFrom.equals("") ? course.getBeginDate() : Date.valueOf(dateFrom),
-                        dateTo.equals("") ? course.getBeginDate() : Date.valueOf(dateTo),
-                        courseType.equals("")?course.getCourseTyp() : CourseTyp.valueOf(courseType)
-                        )
-                );
-            optionalCourseUpdated.ifPresentOrElse(
-                    (c) -> System.out.println("Kurs aktualiesiet" + c),
-                    () -> System.out.println("Kurs konnte nicht aktualisiert werden")
-            );
+            if (courseOptional.isEmpty()) {
+                System.out.println("Kurs mit der ID ist nicht in der DB.");
+                return;
             }
-        }catch (Exception exception){
-            System.out.println("unbekannter fehler" + exception.getMessage());
+
+            Course course = courseOptional.get();
+            System.out.println("Aktuell: " + course);
+
+            System.out.println("Bitte neue Kursdaten angeben (Enter = keine Änderung)");
+            System.out.print("Name: ");
+            String name = scan.nextLine();
+
+            System.out.print("Beschreibung: ");
+            String description = scan.nextLine();
+
+            System.out.print("Hours: ");
+            String hours = scan.nextLine();
+
+            System.out.print("Start Datum (YYYY-MM-DD): ");
+            String dateFrom = scan.nextLine();
+
+            System.out.print("End Datum (YYYY-MM-DD): ");
+            String dateTo = scan.nextLine();
+
+            System.out.print("Kurstyp (ZA/BF/FF/OE): ");
+            String courseType = scan.nextLine();
+
+            Course updated = new Course(
+                    course.getID(),
+                    name.isEmpty() ? course.getName() : name,
+                    description.isEmpty() ? course.getDescripection() : description,
+                    hours.isEmpty() ? course.getHours() : Integer.parseInt(hours),
+                    dateFrom.isEmpty() ? course.getBeginDate() : Date.valueOf(dateFrom),
+                    dateTo.isEmpty() ? course.getEndDate() : Date.valueOf(dateTo),
+                    courseType.isEmpty() ? course.getCourseTyp() : CourseTyp.valueOf(courseType)
+            );
+
+            Optional<Course> optionalCourseUpdated = repo.update(updated);
+            optionalCourseUpdated.ifPresentOrElse(
+                    c -> System.out.println("Kurs aktualisiert: " + c),
+                    () -> System.out.println("Kurs konnte nicht aktualisiert werden.")
+            );
+
+        } catch (Exception e) {
+            System.out.println("Fehler: " + e.getMessage());
         }
     }
 
     private void addCourse() {
-        String name, description;
-        int hours;
-        Date dateFrom, dateTo;
-        CourseTyp courseTyp;
+        try {
+            System.out.println("Bitte alle Kursdaten angeben");
+            System.out.print("Name: ");
+            String name = scan.nextLine();
+            if (name.isEmpty()) throw new IllegalArgumentException("Name darf nicht leer sein");
 
-        try{
-            System.out.println("bitte alle kurs daten angeben");
-            System.out.println("Name: ");
-            name = scan.nextLine();
-            if (name.equals("")) throw new IllegalArgumentException(("Eingabe darf nict leer sein"));
+            System.out.print("Beschreibung: ");
+            String description = scan.nextLine();
+            if (description.isEmpty()) throw new IllegalArgumentException("Beschreibung darf nicht leer sein");
 
-            System.out.println("description: ");
-            description = scan.nextLine();
-            if (description.equals("")) throw new IllegalArgumentException(("Eingabe darf nict leer sein"));
+            System.out.print("Hours: ");
+            int hours = Integer.parseInt(scan.nextLine());
 
-            System.out.println("hours: ");
-            hours = Integer.parseInt(scan.nextLine());
+            System.out.print("Start Datum (YYYY-MM-DD): ");
+            Date dateFrom = Date.valueOf(scan.nextLine());
 
-            System.out.println("Start Datum: ");
-            dateFrom = Date.valueOf(scan.nextLine());
+            System.out.print("End Datum (YYYY-MM-DD): ");
+            Date dateTo = Date.valueOf(scan.nextLine());
 
-            System.out.println("End Datum: ");
-            dateTo = Date.valueOf(scan.nextLine());
+            System.out.print("Kurstyp (ZA/BF/FF/OE): ");
+            CourseTyp courseTyp = CourseTyp.valueOf(scan.nextLine());
 
-            System.out.println("Kurstyp ZA/BF/FF/OE");
-            courseTyp = CourseTyp.valueOf(scan.nextLine());
+            Optional<Course> optionalCourse = repo.insert(new Course(name, description, hours, dateFrom, dateTo, courseTyp));
 
-            Optional<Course> optionalCourse = repo.insert(
-                    new Course(name,description,hours,dateFrom,dateTo,courseTyp)
+            optionalCourse.ifPresentOrElse(
+                    c -> System.out.println("Kurs angelegt: " + c),
+                    () -> System.out.println("Kurs konnte nicht angelegt werden.")
             );
 
-            if(optionalCourse.isPresent()){
-                System.out.println("Kurs angelegt" + optionalCourse.get());
-            }else{
-                System.out.println("Kurs könnte nicht angelegt werden");
-            }
-
-        }catch (IllegalArgumentException illegalArgumentException){
-            System.out.println("Eingabefehler" + illegalArgumentException);
-        }catch (InvalidValueException invalidValueException){
-            System.out.println("Kursdaten nicht korrejt" + invalidValueException.getMessage());
-        }catch (DatabaseExeption databaseExeption){
-            System.out.println("Datenbankfehler beim Einfügen" + databaseExeption.getMessage());
-        }catch (Exception exception){
-            System.out.println("Unbekannter fehler" + exception.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Eingabefehler: " + e.getMessage());
+        } catch (InvalidValueException e) {
+            System.out.println("Kursdaten nicht korrekt: " + e.getMessage());
+        } catch (DatabaseExeption e) {
+            System.out.println("Datenbankfehler: " + e.getMessage());
         }
     }
 
     private void showAllCourses() {
-        List <Course> list = null;
-        try{
-
-            list = repo.getAll();
-            if(list.size() > 0)
-            {
-                for(Course course : list){
-                    System.out.println(course);
-                }
-            }else {
-                System.out.println("Kurs leer");
+        try {
+            List<Course> list = repo.getAll();
+            if (list.isEmpty()) {
+                System.out.println("Keine Kurse vorhanden.");
+            } else {
+                list.forEach(System.out::println);
             }
-        } catch(DatabaseExeption databaseException)
-            {
-                System.out.println("Datenbankkfehler " + databaseException.getMessage());
-            } catch(Exception exception){
-                System.out.println("unbekannterfehler" + exception.getMessage());
-            }
+        } catch (DatabaseExeption e) {
+            System.out.println("Datenbankfehler: " + e.getMessage());
+        }
     }
 
+    // ---------------- STUDENTEN ----------------
 
-    private void showCourseDetails(){
-        System.out.println("Für welchen Kurs möchten Siedie Kurs Details anzeigen");
-        Long courseId = Long.parseLong((scan.nextLine()));
+    private void showAllStudents() {
+        List<Student> list = studi.getAll();
+        if (list.isEmpty()) {
+            System.out.println("Keine Studenten vorhanden.");
+        } else {
+            list.forEach(System.out::println);
+        }
+    }
 
+    private void findStudentByName() {
+        System.out.print("Suchbegriff (Vorname): ");
+        String search = scan.nextLine();
+        List<Student> list = studi.searchByStudentVorname(search);
+        if (list.isEmpty()) System.out.println("Keine Studenten gefunden.");
+        else list.forEach(System.out::println);
+    }
+
+    private void addStudent() {
         try {
-            Optional<Course> courseOptional = repo.getById(courseId);
-            if(courseOptional.isPresent())
-            {
-                System.out.println(courseOptional.get());
-            }else{
-                System.out.println("Kurse mit der ID" + courseId + "nicht gefunden");
-            }
-        } catch (DatabaseExeption databaseExeption) {
-            System.out.println("Datenbankfehler bei Kursanzeigen " + databaseExeption.getMessage());
+            System.out.print("Vorname: ");
+            String vn = scan.nextLine();
+            System.out.print("Nachname: ");
+            String nn = scan.nextLine();
+            System.out.print("Geburtstag (YYYY-MM-DD): ");
+            Date geb = Date.valueOf(scan.nextLine());
 
-        }catch (Exception exception){
-            System.out.println("Unbekannterfehler" + exception.getMessage());
+            Student s = new Student(null, vn, nn, geb);
+            Optional<Student> optionalStudent = studi.insert(s);
+
+            optionalStudent.ifPresentOrElse(
+                    st -> System.out.println("Student angelegt: " + st),
+                    () -> System.out.println("Fehler beim Anlegen.")
+            );
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ungültiges Format: " + e.getMessage());
+        } catch (InvalidStudentDataException e) {
+            System.out.println("Studentendaten nicht korrekt: " + e.getMessage());
+        } catch (DatabaseExeption e) {
+            System.out.println("Datenbankfehler: " + e.getMessage());
+        }
+    }
+
+    private void updateStudent() {
+        try {
+            System.out.print("ID des Studenten zum Bearbeiten: ");
+            Long id = Long.parseLong(scan.nextLine());
+
+            Optional<Student> sOpt = studi.getById(id);
+            if (sOpt.isEmpty()) {
+                System.out.println("Student nicht gefunden!");
+                return;
+            }
+
+            Student s = sOpt.get();
+            System.out.println("Aktuell: " + s);
+
+            System.out.print("Neuer Vorname (Enter = behalten): ");
+            String vn = scan.nextLine();
+            if (!vn.isEmpty()) s.setVorname(vn);
+
+            System.out.print("Neuer Nachname (Enter = behalten): ");
+            String nn = scan.nextLine();
+            if (!nn.isEmpty()) s.setNachname(nn);
+
+            System.out.print("Neuer Geburtstag (YYYY-MM-DD) (Enter = behalten): ");
+            String dateStr = scan.nextLine();
+            if (!dateStr.isEmpty()) s.setBirthday(Date.valueOf(dateStr));
+
+            // Wichtig: id bleibt gleich
+            s.setStudentId(id);
+
+            Optional<Student> updated = studi.update(s);
+            updated.ifPresentOrElse(
+                    st -> System.out.println("Student aktualisiert: " + st),
+                    () -> System.out.println("Student konnte nicht aktualisiert werden.")
+            );
+
+        } catch (Exception e) {
+            System.out.println("Fehler: " + e.getMessage());
+        }
+    }
+
+    private void deleteStudent() {
+        try {
+            System.out.print("ID des zu löschenden Studenten: ");
+            Long id = Long.parseLong(scan.nextLine());
+            studi.deleteById(id);
+            System.out.println("Löschvorgang durchgeführt.");
+        } catch (Exception e) {
+            System.out.println("Fehler: " + e.getMessage());
         }
     }
 
     private void showMenue() {
-        System.out.println("------------Kurs Management-----------------------");
-        System.out.println("(1) Kurs Eingeben \t (2) Alle Kurse anzeigen \t (3) nach id suchen \t (4) Update \t(5) Löschen \t (6)genaue suche \t (7) Laufende Kurse");
-        System.out.println("(x) ENDE");
+        System.out.println("---------------- KURSMANAGEMENT ----------------");
+        System.out.println("(1) Alle Kurse anzeigen");
+        System.out.println("(2) Kurs suchen (nach Name/Beschreibung)");
+        System.out.println("(3) Neuen Kurs anlegen");
+        System.out.println("(4) Kurs bearbeiten");
+        System.out.println("(5) Kurs löschen");
+        System.out.println("---------------- STUDENTEN ----------------");
+        System.out.println("(6) Alle Studenten anzeigen");
+        System.out.println("(7) Student suchen (Vorname)");
+        System.out.println("(8) Neuen Student anlegen");
+        System.out.println("(9) Student bearbeiten");
+        System.out.println("(10) Student löschen");
+        System.out.println("x.  Beenden");
+        System.out.print("Auswahl: ");
     }
-
-    private void inputError(){
-        System.out.println("Bitte nur die Zahlen der Menüauswahl eingeben");
-    }
-
-
 }
