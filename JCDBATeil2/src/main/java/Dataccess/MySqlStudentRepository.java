@@ -149,4 +149,17 @@ public class MySqlStudentRepository implements MyStudentRepository {
                 rs.getDate("birthday")
         );
     }
+
+    @Override
+    public int deleteByName(String vorname, String nachname) {
+        String sql = "DELETE FROM student WHERE vorname = ? AND nachname = ?";
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setString(1, vorname);
+            stmt.setString(2, nachname);
+            return stmt.executeUpdate(); // Anzahl gelöschter Zeilen
+        } catch (SQLException e) {
+            throw new DatabaseExeption("DeleteByName Fehler: " + e.getMessage());
+        }
+    }
+
 }
