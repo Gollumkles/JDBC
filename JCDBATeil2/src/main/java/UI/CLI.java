@@ -62,6 +62,10 @@ public class CLI {
                 case "10":
                     deleteStudent();
                     break;
+                case "11":
+                    deleteStudentByName();
+                    break;
+
                 case "x":
                     System.out.println("Auf Wiedersehen!");
                     break;
@@ -303,6 +307,25 @@ public class CLI {
         }
     }
 
+    private void deleteStudentByName() {
+        try {
+            System.out.print("Vorname: ");
+            String vn = scan.nextLine().trim();
+            System.out.print("Nachname: ");
+            String nn = scan.nextLine().trim();
+
+            int deleted = studi.deleteByName(vn, nn);
+            if (deleted == 0) {
+                System.out.println("Kein Student mit diesem Namen gefunden.");
+            } else {
+                System.out.println("Gelöscht: " + deleted + " Datensatz/Datensätze.");
+            }
+        } catch (Exception e) {
+            System.out.println("Fehler: " + e.getMessage());
+        }
+    }
+
+
     private void showMenue() {
         System.out.println("---------------- KURSMANAGEMENT ----------------");
         System.out.println("(1) Alle Kurse anzeigen");
@@ -316,6 +339,7 @@ public class CLI {
         System.out.println("(8) Neuen Student anlegen");
         System.out.println("(9) Student bearbeiten");
         System.out.println("(10) Student löschen");
+        System.out.println("(11) Student löschen (Vorname+Nachname)");
         System.out.println("x.  Beenden");
         System.out.print("Auswahl: ");
     }
